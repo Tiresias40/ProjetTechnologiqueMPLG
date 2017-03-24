@@ -8,8 +8,12 @@ public class Bus {
 		ServerSocket socketBus = null; 
 		PrintWriter printW;
 		BufferedReader reader;
+		int last_id; // Id du dernier message
+		// Tableau contenant toutes les infos sur les capteurs connectés
 		
-		public Bus( int numPort) throws IOException {
+		
+		//num de port 7182
+		public Bus(int numPort) throws IOException {
 		  socketBus = new ServerSocket(numPort);
     }
 		
@@ -22,5 +26,9 @@ public class Bus {
 		  JsonReader jreader = Json.createReader(reader);
 		  jsonObj = (JsonObject) jreader.read();
 		  return jsonObj;
+		}
+		
+		public void list(String sender_class, String sender_name) {
+		  // A FAIRE
 		}
 }
