@@ -6,7 +6,8 @@ public class Sender {
 	private String sender_class;
 	private String sender_name;
 	private int sender_id;
-	private Bus bus;
+	private Bus bus; // Peut-être à supprimer ?
+  private int last_id; // Id du dernier message
 	
 	public Sender(String sender_class, String sender_name, Bus bus) {
 		this.sender_class = sender_class;
@@ -14,6 +15,18 @@ public class Sender {
 		this.sender_id = -1;
 		this.bus = bus;
 	}
+	public String getSender_class() {
+    return sender_class;
+  }
+  public void setSender_class(String sender_class) {
+    this.sender_class = sender_class;
+  }
+  public String getSender_name() {
+    return sender_name;
+  }
+  public void setSender_name(String sender_name) {
+    this.sender_name = sender_name;
+  }
 	
 	public void printError(int error){
 	  switch(error){
@@ -70,12 +83,24 @@ public class Sender {
 	  //retour serveur
 	  JsonObject answer = bus.request(request);
 	  String ack = answer.getString("resp");
-	  if(ack.equals("ok")){
-	  }
-	  else {
+	  if(ack.equals("error")){
 	    int error = answer.getInt("error_id");
 	    printError(error);
 	  }
 	  return ack;
 	}
+	
+	public void send(JsonObject content) {
+	  JsonObjectBuilder requestBuild = Json.createObjectBuilder();
+	  requestBuild.add("type", "send");
+	  requestBuild.add("sender_id", sender_id);
+	  requestBuild.add("content", content);
+	  JsonObject request = requestBuild.build();
+	  //retour serveur
+	  JsonObject answer = bus.request(request);
+	  String ack = answer.getString("resp");
+	  if(ack.equals("error")) {
+	    int error = answer.getInt("error_id");
+      printError(error);
+	  }  
 }
