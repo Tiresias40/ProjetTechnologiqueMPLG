@@ -103,4 +103,26 @@ public class Sender {
 	    int error = answer.getInt("error_id");
       printError(error);
 	  }  
+	}
+	public void get(int sender_id, int msg_id) {
+		JsonObjectBuilder requestBuild = Json.createObjectBuilder();
+		requestBuild.add("type", "get");
+		requestBuild.add("sender_id", sender_id);
+		requestBuild.add("msg_id", msg_id);
+		JsonObject request = requestBuild.build();
+		// retour serveur
+		JsonObject answer = bus.request(request);
+		String ack = answer.getString("resp");
+		if (ack.equals("error")) {
+			int error = answer.getInt("error_id");
+			printError(error);
+		}else{
+			// Afficher contenu message
+			// Temporaire
+			int lat = answer.getInt("lat");
+			int lng = answer.getInt("lng");
+			System.out.println("lat : "+lat+" lng : "+lng);
+		}
+	}
 }
+
