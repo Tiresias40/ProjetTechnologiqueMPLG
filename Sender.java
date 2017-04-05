@@ -8,7 +8,6 @@ public class Sender {
 	private String sender_name;
 	private int sender_id;
 	private Bus bus; // Peut-être à supprimer ?
-	private int last_id; // Id du dernier message
 
 	public Sender(String sender_class, String sender_name, Bus bus) {
 		this.sender_class = sender_class;
@@ -115,47 +114,6 @@ public class Sender {
 		if (ack.equals("error")) {
 			int error = answer.getInt("error_id");
 			printError(error);
-		}
-	}
-
-	public void get(int sender_id, int msg_id) {
-		JsonObjectBuilder requestBuild = Json.createObjectBuilder();
-		requestBuild.add("type", "get");
-		requestBuild.add("sender_id", sender_id);
-		requestBuild.add("msg_id", msg_id);
-		JsonObject request = requestBuild.build();
-		// retour serveur
-		JsonObject answer = bus.request(request);
-		String ack = answer.getString("resp");
-		if (ack.equals("error")) {
-			int error = answer.getInt("error_id");
-			printError(error);
-		} else {
-			// Afficher contenu message
-			// Temporaire pour GPS
-			int lat = answer.getInt("lat");
-			int lng = answer.getInt("lng");
-			System.out.println("lat : " + lat + " lng : " + lng);
-		}
-	}
-	
-	public void get_last(int sender_id){
-		JsonObjectBuilder requestBuild = Json.createObjectBuilder();
-		requestBuild.add("type", "get_last");
-		requestBuild.add("sender_id", sender_id);
-		JsonObject request = requestBuild.build();
-		// retour serveur
-		JsonObject answer = bus.request(request);
-		String ack = answer.getString("resp");
-		if (ack.equals("error")) {
-			int error = answer.getInt("error_id");
-			printError(error);
-		} else {
-			// Afficher contenu message
-			// Temporaire pour GPS
-			int lat = answer.getInt("lat");
-			int lng = answer.getInt("lng");
-			System.out.println("lat : " + lat + " lng : " + lng);
 		}
 	}
 }
