@@ -2,17 +2,19 @@ package projet;
 
 import java.io.*;
 import java.net.*;
+import java.util.*;
 
 import javax.json.*;
 
 public class Bus {
 	private ServerSocket socketBus;
-	private PrintWriter printW; // Facultatif
-	private BufferedReader reader; // Facultatif
-	// Tableau contenant toutes les infos sur les capteurs connectés, regroupant tous les messages
+	private PrintWriter printW; // Facultatif ?
+	private BufferedReader reader; // Facultatif ?
+	// Tableau contenant toutes les infos sur les capteurs connectés, regroupant
+	// tous les messages
 	// Matrice : sender_id et msg_id -> facile à retrouver
-	private JsonObject[][] tabMsg = new JsonObject[10][100]; // Passer en Array, ArrayList, List ? JsonObject particulier ?
-	private Sender[] tabSender = new Sender[10]; // Passer en Array, ArrayList, List ?
+	private ArrayList<ArrayList<JsonObject>> tabMsg = new ArrayList<ArrayList<JsonObject>>();
+	private ArrayList<Sender> tabSender = new ArrayList<Sender>();
 
 	// num de port 7182
 	public Bus(int numPort) throws IOException {
@@ -23,77 +25,85 @@ public class Bus {
 		this(7182);
 	}
 
-	JsonObject request(JsonObject jsonObj) {		
+	JsonObject request(JsonObject jsonObj) {
 		String type = jsonObj.getString("type");
-		// Faire des appels de fonction pour chaque cas -> désengorge code, pas trop grosse fonction request
+		// Faire des appels de fonction pour chaque cas -> désengorge code, pas
+		// trop grosse fonction request
 		// Switch case ou if ? String, compliqué ...
-		// Plan A : série if pour convertir String en int -> if(==register) entier=1, if(==deregister) entier=2, ...
+		// Plan A : série if pour convertir String en int -> if(==register)
+		// entier=1, if(==deregister) entier=2, ...
 		// Plan B : série if pour remplacer switch :
-		if(type.equals("register")){
+		if (type.equals("register")) {
 			// Enregistrement
-		}else if(type.equals("deregister")){
+		} else if (type.equals("deregister")) {
 			// Désenregistrement
-		}else if(type.equals("list")){
-			list(jsonObj.getString("sender_class"), jsonObj.getString("sender_name"));
-		}else if(type.equals("send")){
+		} else if (type.equals("list")) {
+			list(jsonObj.getString("sender_class"),
+					jsonObj.getString("sender_name"));
+		} else if (type.equals("send")) {
 			// Fonction send (receive ?)
-		}else{
+		} else {
 			// Erreur
 		}
-		
+
 		return jsonObj; // A modifier, comment l'envoyer au capteur ?
 	}
-	
+
 	// Fonctions register, deregister à faire version Bus
 
 	public JsonObject list(String sender_class, String sender_name) {
-		Sender[] results = new Sender[tabSender.length];
-		for (int count = 0; count < tabSender.length; count++) {
+		ArrayList<Sender> results = new ArrayList<Sender>();
+		for (int count = 0; count < tabSender.size(); count++) {
 			if (sender_class != null
-					&& tabSender[count].getSender_class().equals(sender_class)) {
+					&& tabSender.get(count).getSender_class().equals(sender_class)) {
 				if (sender_name != null
-						&& tabSender[count].getSender_name()
+						&& tabSender.get(count).getSender_name()
 								.equals(sender_name)) { // Les deux
-					results[count] = tabSender[count];
+					results.add(tabSender.get(count));
 				} else { // Que class
-					results[count] = tabSender[count];
+					results.add(tabSender.get(count));
 				}
 			} else {
 				if (sender_name != null
-						&& tabSender[count].getSender_name()
+						&& tabSender.get(count).getSender_name()
 								.equals(sender_name)) { // Que name
-					results[count] = tabSender[count];
+					results.add(tabSender.get(count));
 				} else { // Tout envoyer (aucun des deux attributs)
-					results[count] = tabSender[count];
+					results.add(tabSender.get(count));
 				}
 			}
 		}
 		// Convertir Sender[] en JsonObject (Array ?)
-		return ;
+		return;
 	}
-	
-	public void receive(){
+
+	public void receive() {
 		// Réponse à send() de Sender.java
 	}
-	
+
 	public JsonObject get(int sender_id, int msg_id) {
 		// Chercher le message dans tableau messages du bus
-		JsonObject msg = tabMsg[sender_id][msg_id]; // A modifier
-		
+		JsonObject msg = tabMsg.get(sender_id); // A modifier !!!
+
 		JsonObjectBuilder requestBuild = Json.createObjectBuilder();
 		requestBuild.add("type", "get");
-		//requestBuild.add("ack", ""); // jsonobject resp ; ok
+		
+		JsonObjectBuilder ackBuild = Json.createObjectBuilder();
+		ackBuild.add("resp", "ok"); // Penser à coder le cas d'erreur !
+		JsonObject ack = ackBuild.build();
+		requestBuild.add("ack", ack);
 		requestBuild.add("msg_id", msg_id);
-		// requestBuild.add("date", date); // comment avoir la date du message ? L'enregistrer au même moment ?
-		// requestBuild.add("contents", msg); // extraire contents du msg/JsonObject
+		// requestBuild.add("date", date); // comment avoir la date du message ?
+		// L'enregistrer au même moment ?
+		requestBuild.add("contents", msg.getJsonObject("contents"));
 		JsonObject request = requestBuild.build();
 
 		return request;
 	}
-	
-	public JsonObject get_last(int sender_id){
+
+	public JsonObject get_last(int sender_id) {
 		// Prendre indice dernier message tableau concernant sender_id
-	    int idLastMessage = 1; // Aller au dernier objet de la liste tabMsg
-		return get(sender_id, idLastMessage); // idLastMessage récupérer avant
+		int idLastMessage = tabMsg.get(tabMsg.size()).getInt("msg_id"); // A modifier ! Ne vérifie pas sender_id ici.
+		return get(sender_id, idLastMessage);
 	}
 }
