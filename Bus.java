@@ -82,7 +82,21 @@ public class Bus {
 			}
 		}
 		// Convertir Sender[] en JsonObject (Array ?)
-		return;
+		JsonObjectBuilder buildArray = Json.createObjectBuilder();
+    JsonObjectBuilder answerBuild = Json.createObjectBuilder();
+      answerBuild.add("type", "list");
+      answerBuild.add("ack", "ok");
+      JsonArrayBuilder result = Json.createArrayBuilder();
+        for(int i = 0; i < tabSender.length; i++) {
+          Sender s;
+          s = tabSender[i]; 
+          result.add(buildArray);
+            buildArray.add("sender_id", s.getSender_id());
+            buildArray.add("sender_class", s.getSender_class());
+            buildArray.add("sender_name", s.getSender_name());
+            buildArray.add("last_message_id", s.getLast_id());
+        }
+		return answer;
 	}
 
 	public JsonObject receive(int sender_id, JsonObject contents) {
