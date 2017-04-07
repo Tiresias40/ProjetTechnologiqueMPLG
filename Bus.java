@@ -52,7 +52,9 @@ public class Bus {
 		// if sender déjà enregistré ?
 		// Gérer les ids des différents types de capteurs
 		Sender new_sender = new Sender(sender_class, sender_name, null);
-		// new_sender.setSender_id(tabSender.size());
+		int i = 0;
+		while(i<tabSender.size() && tabSender.get(++i).getSender_id()!=-1){;}
+		new_sender.setSender_id(i);
 		tabSender.add(new_sender);
 
 		JsonObjectBuilder answerBuild = Json.createObjectBuilder();
@@ -63,7 +65,7 @@ public class Bus {
 		JsonObject ack = ackBuild.build();
 		answerBuild.add("ack", ack);
 		
-		// answerBuild.add("sender_id", ); // A modifier
+		answerBuild.add("sender_id", i);
 		JsonObject answer = answerBuild.build();
 		
 		return answer;
@@ -71,7 +73,9 @@ public class Bus {
 	
 	public JsonObject bus_deregister(int sender_id){
 		// Gérer cas d'erreur, est-ce que l'on supprime aussi les messages ?
-		tabSender.remove(sender_id);
+		tabSender.get(sender_id).setSender_id(-1);
+		tabSender.get(sender_id).setSender_name("");
+		tabSender.get(sender_id).setSender_class("");
 		
 		JsonObjectBuilder answerBuild = Json.createObjectBuilder();
 		answerBuild.add("type", "deregister");
@@ -81,7 +85,6 @@ public class Bus {
 		JsonObject ack = ackBuild.build();
 		answerBuild.add("ack", ack);
 		
-		// answerBuild.add("sender_id", ); // A modifier
 		JsonObject answer = answerBuild.build();
 		
 		return answer;
@@ -128,7 +131,7 @@ public class Bus {
 			buildArray.add("sender_id", s.getSender_id());
 			buildArray.add("sender_class", s.getSender_class());
 			buildArray.add("sender_name", s.getSender_name());
-			buildArray.add("last_message_id", tabMsg.get(i).get(tabMsg.size()).getInt("msg_id")); // Faire attribut last_message_id dans Sender.java
+			buildArray.add("last_message_id", s.getLast_message_id()); // Faire attribut last_message_id dans Sender.java
 			result.add(buildArray.build());
 		}
 		answerBuild.add("results", result);
@@ -185,7 +188,6 @@ public class Bus {
 
 	public JsonObject get_last(int sender_id) {
 		// Prendre indice dernier message tableau concernant sender_id
-		return get(sender_id,
-				tabMsg.get(sender_id).get(tabMsg.size()).getInt("msg_id"));
+		return get(sender_id, tabSender.get(sender_id).getLast_message_id());
 	}
 }

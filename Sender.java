@@ -7,13 +7,13 @@ public class Sender {
 	private String sender_class;
 	private String sender_name;
 	private int sender_id;
-	private Bus bus; // Peut-être à supprimer ?
+	private Bus bus; // A supprimer ?
 
 	public Sender(String sender_class, String sender_name, Bus bus) {
 		this.sender_class = sender_class;
 		this.sender_name = sender_name;
 		this.sender_id = -1;
-		this.bus = bus;
+		this.bus = bus; // A supprimer
 	}
 
 	public String getSender_class() {
