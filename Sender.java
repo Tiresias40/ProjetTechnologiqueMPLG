@@ -32,6 +32,14 @@ public class Sender {
 		this.sender_name = sender_name;
 	}
 
+	public int getSender_id() {
+		return sender_id;
+	}
+
+	public void setSender_id(int sender_id) {
+		this.sender_id = sender_id;
+	}
+
 	public void printError(int error) {
 		switch (error) {
 		case 400:

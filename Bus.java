@@ -29,41 +29,70 @@ public class Bus {
 		String type = jsonObj.getString("type");
 		String sender_class = jsonObj.getString("sender_class");
 		String sender_name = jsonObj.getString("sender_name");
-		
+		int sender_id = jsonObj.getInt("sender_id");
+
 		if (type.equals("register")) {
 			jsonObj = bus_register(sender_class, sender_name);
 		} else if (type.equals("deregister")) {
-			// Désenregistrement
+			jsonObj = bus_deregister(sender_id);
 		} else if (type.equals("list")) {
 			jsonObj = list(sender_class, sender_name);
 		} else if (type.equals("send")) {
-			jsonObj = receive(jsonObj.getInt("sender_id"), jsonObj.getJsonObject("contents"));
+			jsonObj = receive(sender_id,
+					jsonObj.getJsonObject("contents"));
 		} else {
 			// Erreur
 		}
 
-		return jsonObj; // A modifier, comment l'envoyer au capteur ? Même objet que celui reçu, problème ?
+		return jsonObj; // A modifier, comment l'envoyer au capteur ? Même objet
+						// que celui reçu, problème ?
 	}
 
-	// Fonctions register, deregister à faire version Bus
-	
-	public JsonObject bus_register(String sender_class, String sender_name){
+	public JsonObject bus_register(String sender_class, String sender_name) {
 		// if sender déjà enregistré ?
+		// Gérer les ids des différents types de capteurs
 		Sender new_sender = new Sender(sender_class, sender_name, null);
+		// new_sender.setSender_id(tabSender.size());
 		tabSender.add(new_sender);
+
+		JsonObjectBuilder answerBuild = Json.createObjectBuilder();
+		answerBuild.add("type", "register");
 		
 		JsonObjectBuilder ackBuild = Json.createObjectBuilder();
 		ackBuild.add("resp", "ok"); // Penser à coder le cas d'erreur !
 		JsonObject ack = ackBuild.build();
+		answerBuild.add("ack", ack);
 		
-		return ack;
+		// answerBuild.add("sender_id", ); // A modifier
+		JsonObject answer = answerBuild.build();
+		
+		return answer;
+	}
+	
+	public JsonObject bus_deregister(int sender_id){
+		// Gérer cas d'erreur, est-ce que l'on supprime aussi les messages ?
+		tabSender.remove(sender_id);
+		
+		JsonObjectBuilder answerBuild = Json.createObjectBuilder();
+		answerBuild.add("type", "deregister");
+		
+		JsonObjectBuilder ackBuild = Json.createObjectBuilder();
+		ackBuild.add("resp", "ok"); // Penser à coder le cas d'erreur !
+		JsonObject ack = ackBuild.build();
+		answerBuild.add("ack", ack);
+		
+		// answerBuild.add("sender_id", ); // A modifier
+		JsonObject answer = answerBuild.build();
+		
+		return answer;
 	}
 
 	public JsonObject list(String sender_class, String sender_name) {
-		ArrayList<Sender> results = new ArrayList<Sender>();
+		ArrayList<Sender> results = new ArrayList<Sender>(); // ArrayList contenant tous les capteurs concernés par la requête
 		for (int count = 0; count < tabSender.size(); count++) {
 			if (sender_class != null
-					&& tabSender.get(count).getSender_class().equals(sender_class)) {
+					&& tabSender.get(count).getSender_class()
+							.equals(sender_class)) {
 				if (sender_name != null
 						&& tabSender.get(count).getSender_name()
 								.equals(sender_name)) { // Les deux
@@ -81,28 +110,37 @@ public class Bus {
 				}
 			}
 		}
-		// Convertir Sender[] en JsonObject (Array ?)
-		JsonObjectBuilder buildArray = Json.createObjectBuilder();
-    JsonObjectBuilder answerBuild = Json.createObjectBuilder();
-      answerBuild.add("type", "list");
-      answerBuild.add("ack", "ok");
-      JsonArrayBuilder result = Json.createArrayBuilder();
-        for(int i = 0; i < tabSender.length; i++) {
-          Sender s;
-          s = tabSender[i]; 
-          result.add(buildArray);
-            buildArray.add("sender_id", s.getSender_id());
-            buildArray.add("sender_class", s.getSender_class());
-            buildArray.add("sender_name", s.getSender_name());
-            buildArray.add("last_message_id", s.getLast_id());
-        }
+		// Conversion ArrayList<Sender> en JsonObject (Array ?)
+		JsonObjectBuilder answerBuild = Json.createObjectBuilder();
+		answerBuild.add("type", "list");
+		
+		JsonObjectBuilder ackBuild = Json.createObjectBuilder();
+		ackBuild.add("resp", "ok"); // Penser à coder le cas d'erreur !
+		JsonObject ack = ackBuild.build();
+		answerBuild.add("ack", ack);
+		
+		JsonArray result = Json.createArrayBuilder().build(); // Crée un JsonArray vide
+		JsonObjectBuilder buildArray;
+		Sender s;
+		for (int i = 0; i < results.size(); i++) {
+			buildArray = Json.createObjectBuilder(); // Crée un nouveau buildArray à chaque itération (pas sûr)
+			s = tabSender.get(i);
+			buildArray.add("sender_id", s.getSender_id());
+			buildArray.add("sender_class", s.getSender_class());
+			buildArray.add("sender_name", s.getSender_name());
+			buildArray.add("last_message_id", tabMsg.get(i).get(tabMsg.size()).getInt("msg_id")); // Faire attribut last_message_id dans Sender.java
+			result.add(buildArray.build());
+		}
+		answerBuild.add("results", result);
+		JsonObject answer = answerBuild.build();
+		
 		return answer;
 	}
 
 	public JsonObject receive(int sender_id, JsonObject contents) {
 		// Réponse à send() de Sender.java
 		// Penser à enregistrer la date avec le message, cf java.util.Date
-		if(!tabMsg.contains(sender_id)){
+		if (!tabMsg.contains(sender_id)) {
 			ArrayList<JsonObject> sender_msg_list = new ArrayList<JsonObject>();
 			tabMsg.add(sender_msg_list);
 		}
@@ -111,12 +149,17 @@ public class Bus {
 		msgBuild.add("contents", contents);
 		JsonObject msg = msgBuild.build();
 		tabMsg.get(sender_id).add(msg);
+
+		JsonObjectBuilder answerBuild = Json.createObjectBuilder();
+		answerBuild.add("type", "send");
 		
 		JsonObjectBuilder ackBuild = Json.createObjectBuilder();
 		ackBuild.add("resp", "ok"); // Penser à coder le cas d'erreur !
 		JsonObject ack = ackBuild.build();
+		answerBuild.add("ack", ack);
 		
-		return ack;
+		JsonObject answer = answerBuild.build();
+		return answer;
 	}
 
 	public JsonObject get(int sender_id, int msg_id) {
@@ -125,11 +168,12 @@ public class Bus {
 
 		JsonObjectBuilder requestBuild = Json.createObjectBuilder();
 		requestBuild.add("type", "get");
-		
+
 		JsonObjectBuilder ackBuild = Json.createObjectBuilder();
 		ackBuild.add("resp", "ok"); // Penser à coder le cas d'erreur !
 		JsonObject ack = ackBuild.build();
 		requestBuild.add("ack", ack);
+		
 		requestBuild.add("msg_id", msg_id);
 		// requestBuild.add("date", date); // comment avoir la date du message ?
 		// L'enregistrer au même moment ?
@@ -141,6 +185,7 @@ public class Bus {
 
 	public JsonObject get_last(int sender_id) {
 		// Prendre indice dernier message tableau concernant sender_id
-		return get(sender_id, tabMsg.get(sender_id).get(tabMsg.size()).getInt("msg_id"));
+		return get(sender_id,
+				tabMsg.get(sender_id).get(tabMsg.size()).getInt("msg_id"));
 	}
 }
