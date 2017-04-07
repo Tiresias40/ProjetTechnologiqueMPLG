@@ -7,12 +7,22 @@ public class Sender {
 	private String sender_class;
 	private String sender_name;
 	private int sender_id;
-	private Bus bus; // Peut-être à supprimer ?
+	private int last_message_id;
+  private Bus bus; // Peut-être à supprimer ?
+	
+	public int getLast_message_id() {
+    return last_message_id;
+  }
+
+  public void setLast_message_id(int last_message_id) {
+    this.last_message_id = last_message_id;
+  }
 
 	public Sender(String sender_class, String sender_name, Bus bus) {
 		this.sender_class = sender_class;
 		this.sender_name = sender_name;
 		this.sender_id = -1;
+		this.last_message_id = -1;
 		this.bus = bus;
 	}
 
@@ -77,7 +87,7 @@ public class Sender {
 	}
 
 	public void register() {
-		// initialisation du json à envoye printError(error);r
+		// initialisation du json à envoyer printError(error);
 		JsonObjectBuilder requestBuild = Json.createObjectBuilder();
 		requestBuild.add("type", "register");
 		requestBuild.add("sender_class", this.sender_class);
