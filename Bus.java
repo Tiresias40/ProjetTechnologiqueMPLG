@@ -52,6 +52,7 @@ public class Bus {
 		// if sender déjà enregistré ?
 		// Gére les id des différents types de capteurs
 		Sender new_sender = new Sender(sender_class, sender_name, null);
+		JsonObject answer = null;
 		if (tabSender.contains(new_sender)) {
 			// return error
 		} else {
@@ -74,10 +75,9 @@ public class Bus {
 			answerBuild.add("ack", ack);
 
 			answerBuild.add("sender_id", i);
-			JsonObject answer = answerBuild.build();
-
-			return answer;
-		}// à corriger
+			answer = answerBuild.build();
+		}
+		return answer;
 	}
 
 	public JsonObject bus_deregister(int sender_id) {
