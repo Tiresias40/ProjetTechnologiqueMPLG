@@ -19,7 +19,7 @@ public class GPS extends Sensor {
 		this.longitude = 0.0;
 		this.sender_name = name;
 	}
-
+	//getter and setters
 	public double getLatitude() {
 		return latitude;
 	}
@@ -35,7 +35,8 @@ public class GPS extends Sensor {
 	public void setLongitude(double longitude) {
 		this.longitude = longitude;
 	}
-
+	
+	//initialise les données à envoyer par la méthode send()
 	public JsonObject initContentToSend() {
 		JsonObjectBuilder contentBuilder = Json.createObjectBuilder();
 		contentBuilder.add("lat", getLatitude());

@@ -23,7 +23,7 @@ public class Gyroscope extends Sensor {
 		this.posZ = 0.0;
 		this.sender_name = name;
 	}
-
+	//getter and setters
 	public double getPosX() {
 		return posX;
 	}
@@ -48,6 +48,7 @@ public class Gyroscope extends Sensor {
 		this.posZ = posZ;
 	}
 
+	//initialise les données à envoyer par la méthode send()
 	public JsonObject initContentToSend() {
 		JsonObjectBuilder contentBuilder = Json.createObjectBuilder();
 		contentBuilder.add("x", getPosX());

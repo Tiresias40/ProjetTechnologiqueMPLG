@@ -23,7 +23,7 @@ public class Accelerometer extends Sensor {
 		this.ValueZ = 0.0;
 		this.sender_name = name;
 	}
-
+	//getter and setters
 	public double getValueX() {
 		return valueX;
 	}
@@ -47,7 +47,8 @@ public class Accelerometer extends Sensor {
 	public void setValueZ(double valueZ) {
 		ValueZ = valueZ;
 	}
-
+	
+	//initialise les données à envoyer par la méthode send()
 	public JsonObject initContentToSend() {
 		JsonObjectBuilder contentBuilder = Json.createObjectBuilder();
 		contentBuilder.add("x", getValueX());
